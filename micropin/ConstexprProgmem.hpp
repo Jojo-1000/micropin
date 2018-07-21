@@ -10,8 +10,8 @@
 #ifndef MICROPIN_CONSTEXPR_PROGMEM_INCLUDED
 #define MICROPIN_CONSTEXPR_PROGMEM_INCLUDED
 
-#include "ModernSTL.h"
-#include "TypeTraits.h"
+#include "ModernSTL.hpp"
+#include "TypeTraits.hpp"
 #include <avr/pgmspace.h>
 
 namespace MicroPin

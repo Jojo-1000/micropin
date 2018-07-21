@@ -11,12 +11,12 @@
 #define MICROPIN_PIN_INCLUDED
 
 #include <stdint.h>
-#include "RegisterDefinitions.h"
+#include "RegisterDefinitions.hpp"
 #include <avr/interrupt.h>
 
-#include "Register.h"
-#include "detail/ADC.h"
-#include "detail/PinDefs.h"
+#include "Register.hpp"
+#include "detail/ADC.hpp"
+#include "detail/PinDefs.hpp"
 
 namespace MicroPin
 {

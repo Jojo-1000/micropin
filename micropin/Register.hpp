@@ -12,7 +12,7 @@
 
 #include <stdint.h>
 
-#include "TypeTraits.h"
+#include "TypeTraits.hpp"
 
 namespace MicroPin
 {

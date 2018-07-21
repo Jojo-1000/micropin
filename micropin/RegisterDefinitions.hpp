@@ -10,11 +10,11 @@
 #ifndef MICROPIN_REGISTERDEFINITIONS_INCLUDED
 #define MICROPIN_REGISTERDEFINITIONS_INCLUDED
 
-#include "Register.h"
+#include "Register.hpp"
 
 //Only some implemented yet
 #if defined (__AVR_ATmega328P__)
-#  include "detail/Registers/ATmegaX8.h"
+#  include "detail/Registers/ATmegaX8.hpp"
 #endif
 
 #endif

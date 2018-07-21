@@ -10,7 +10,7 @@
 #ifndef MICROPIN_DETAIL_PINDEFS_ATMEGAX8_INCLUDED
 #define MICROPIN_DETAIL_PINDEFS_ATMEGAX8_INCLUDED
 
-#include "../../ConstexprProgmem.h"
+#include "../../ConstexprProgmem.hpp"
 
 namespace MicroPin
 {
