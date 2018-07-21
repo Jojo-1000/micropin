@@ -1,2 +1,2 @@
-# micro-pin
-C++11 header-only library for AVR microcontrollers
+# µPin
+C++11 header-only library for AVR microcontroller pin IO
