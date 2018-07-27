@@ -50,13 +50,11 @@ namespace detail
     || defined(__AVR_ATmega88A__) || defined(__AVR_ATmega88PA__) \
     || defined(__AVR_ATmega168A__) || defined(__AVR_ATmega168PA__) \
     || defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
-
-#include "pin-defs/ATmegaX8.hpp"
-
+#   include "pin-defs/ATmegaX8.hpp"
 #elif defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
-
-#include "pin-defs/ATtinyX5.hpp"
-
+#   include "pin-defs/ATtinyX5.hpp"
+#else
+#   error "Unsupported device"
 #endif
 
 #endif

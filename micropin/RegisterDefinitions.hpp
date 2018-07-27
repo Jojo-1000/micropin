@@ -13,8 +13,15 @@
 #include "Register.hpp"
 
 //Only some implemented yet
-#if defined (__AVR_ATmega328P__)
-#  include "detail/Registers/ATmegaX8.hpp"
+#if defined(__AVR_ATmega48A__) || defined(__AVR_ATmega48PA__) \
+    || defined(__AVR_ATmega88A__) || defined(__AVR_ATmega88PA__) \
+    || defined(__AVR_ATmega168A__) || defined(__AVR_ATmega168PA__) \
+    || defined(__AVR_ATmega328__) || defined(__AVR_ATmega328P__)
+#   include "detail/registers/ATmegaX8.hpp"
+#elif defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+#   include "detail/registers/ATtinyX5.hpp"
+#else
+#   error "Unsupported device"
 #endif
 
 #endif
