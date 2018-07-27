@@ -81,7 +81,7 @@ namespace MicroPin
 	template<uint8_t Num>
 	class Port
 	{
-		public:
+	public:
 		static constexpr Register8 GetTypeReg()
 		{
 			return detail::GetPortDataDirection(Num);
@@ -127,11 +127,11 @@ namespace MicroPin
 		}
 		namespace detail
 		{
-			inline void internalDigitalWriteOn(Register8 portReg, uint8_t bitmask)
+			__attribute__((always_inline)) inline void internalDigitalWriteOn(Register8 portReg, uint8_t bitmask)
 			{
 				portReg |= bitmask;
 			}
-			inline void internalDigitalWriteOff(Register8 portReg, uint8_t bitmask)
+			__attribute__((always_inline)) inline void internalDigitalWriteOff(Register8 portReg, uint8_t bitmask)
 			{
 				portReg &= ~bitmask;
 			}
@@ -154,66 +154,6 @@ namespace MicroPin
 		__attribute__((always_inline)) inline bool digitalRead(Register8 dataReg, uint8_t bitmask)
 		{
 			return dataReg & bitmask;
-		}
-		inline void clearPWM(uint8_t timerNum)
-		{
-			switch(timerNum)
-			{
-			case 1:
-				rTCCR0A &= ~bCOM0A1;
-				break;
-			case 2:
-				rTCCR0A &= ~bCOM0B1;
-				break;
-			case 3:
-				rTCCR1A &= ~bCOM1A1;
-				break;
-			case 4:
-				rTCCR1A &= ~bCOM1B1;
-				break;
-			case 5:
-				rTCCR2A &= ~bCOM2A1;
-				break;
-			case 6:
-				rTCCR2A &= ~bCOM2B1;
-				break;
-			}
-		}
-		inline void analogWrite(uint8_t timerNum, uint8_t val)
-		{
-			//6	{&TCCR2A, &OCR2B, COM2B1},	// pin  3
-			//2	{&TCCR0A, &OCR0B, COM0B1},	// pin  5
-			//1	{&TCCR0A, &OCR0A, COM0A1},	// pin  6
-			//3	{&TCCR1A, &OCR1A, COM1A1},	// pin  9
-			//4	{&TCCR1A, &OCR1B, COM1B1},	// pin 10
-			//5	{&TCCR2A, &OCR2A, COM2A1},	// pin 11
-			switch(timerNum)
-			{
-			case 1:
-				rTCCR0A |= bCOM0A1;
-				rOCR0A = val;
-				break;
-			case 2:
-				rTCCR0A |= bCOM0B1;
-				rOCR0B = val;
-				break;
-			case 3:
-				rTCCR1A |= bCOM1A1;
-				rOCR1A = val;
-				break;
-			case 4:
-				rTCCR1A |= bCOM1B1;
-				rOCR1B = val;
-				break;
-			case 5:
-				rTCCR2A |= bCOM2A1;
-				rOCR2A = val;
-				break;
-			case 6:
-				rTCCR2A |= bCOM2B1;
-				rOCR2B = val;
-				break;
-			}
 		}
 		//analogPin = analog pin number (0-7), not actual pin number
 		inline uint16_t analogRead(uint8_t analogPin)
@@ -303,12 +243,12 @@ namespace MicroPin
 			}
 			else
 			{
-				Utils::analogWrite(PinTraits::timer, val);
+				detail::AnalogWrite(PinTraits::timer, val);
 			}
 		}
 		void clearPWM() const
 		{
-			Utils::clearPWM(PinTraits::timer);
+			detail::ClearPWM(PinTraits::timer);
 		}
 	};
 	template<uint8_t Num>
@@ -386,7 +326,7 @@ namespace MicroPin
 				const uint8_t timerNum = detail::GetRuntimePinTimer(GetNum());
 				if(timerNum != 0)
 				{
-					Utils::analogWrite(timerNum, val);
+					detail::AnalogWrite(timerNum, val);
 				}
 				else
 				{
@@ -400,7 +340,7 @@ namespace MicroPin
 			uint8_t timerNum = detail::GetRuntimePinTimer(GetNum());
 			if(timerNum != 0)
 			{
-				Utils::clearPWM(timerNum);
+				detail::ClearPWM(timerNum);
 			}
 		}
 	};

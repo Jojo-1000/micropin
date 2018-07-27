@@ -110,6 +110,69 @@ constexpr MicroPin::Register8 MicroPin::detail::GetPinInput(uint8_t pin)
 	return GetPortInput(GetPinPortN(pin));
 }
 
+inline void MicroPin::detail::ClearPWM(uint8_t timer)
+{
+	switch(timer)
+	{
+	case 1:
+		rTCCR0A &= ~bCOM0A1;
+		break;
+	case 2:
+		rTCCR0A &= ~bCOM0B1;
+		break;
+	case 3:
+		rTCCR1A &= ~bCOM1A1;
+		break;
+	case 4:
+		rTCCR1A &= ~bCOM1B1;
+		break;
+	case 5:
+		rTCCR2A &= ~bCOM2A1;
+		break;
+	case 6:
+		rTCCR2A &= ~bCOM2B1;
+		break;
+	}
+}
+
+inline void MicroPin::detail::AnalogWrite(uint8_t timerNum, uint8_t value)
+{
+	//6	{&TCCR2A, &OCR2B, COM2B1},	// pin  3
+	//2	{&TCCR0A, &OCR0B, COM0B1},	// pin  5
+	//1	{&TCCR0A, &OCR0A, COM0A1},	// pin  6
+	//3	{&TCCR1A, &OCR1A, COM1A1},	// pin  9
+	//4	{&TCCR1A, &OCR1B, COM1B1},	// pin 10
+	//5	{&TCCR2A, &OCR2A, COM2A1},	// pin 11
+	switch(timerNum)
+	{
+	case 1:
+		rTCCR0A |= bCOM0A1;
+		rOCR0A = value;
+		break;
+	case 2:
+		rTCCR0A |= bCOM0B1;
+		rOCR0B = value;
+		break;
+	case 3:
+		rTCCR1A |= bCOM1A1;
+		rOCR1A = value;
+		break;
+	case 4:
+		rTCCR1A |= bCOM1B1;
+		rOCR1B = value;
+		break;
+	case 5:
+		rTCCR2A |= bCOM2A1;
+		rOCR2A = value;
+		break;
+	case 6:
+		rTCCR2A |= bCOM2B1;
+		rOCR2B = value;
+		break;
+	}
+}
+
+
 //Does not check input range
 constexpr uint8_t MicroPin::detail::GetAnalogPort(uint8_t digitalPin)
 {

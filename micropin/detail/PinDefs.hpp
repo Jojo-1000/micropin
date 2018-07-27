@@ -26,8 +26,8 @@ namespace detail
 	constexpr Register8 GetPinData(uint8_t pin);
 	constexpr Register8 GetPinInput(uint8_t pin);
 
-	constexpr Register8 GetTimerControlRegister(uint8_t timer);
-	constexpr Register8 GetTimerOutputCompareRegister(uint8_t timer);
+	inline void ClearPWM(uint8_t timer);
+	inline void AnalogWrite(uint8_t timer, uint8_t value);
 
 	//Does not check input range
 	constexpr uint8_t GetAnalogPort(uint8_t digitalPin);
