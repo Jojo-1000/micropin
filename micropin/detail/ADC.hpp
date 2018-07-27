@@ -13,8 +13,8 @@ namespace MicroPin
 {
 namespace detail
 {
-	//clock prescaler 6 => 64, so the frequency is 125 KHz
-	constexpr uint8_t prescaleADC = 0x06;
+    //clock prescaler 6 => 64, so the frequency is 125 KHz
+    constexpr uint8_t prescaleADC = 0x06;
 }
 }
 
