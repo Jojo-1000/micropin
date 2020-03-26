@@ -26,6 +26,7 @@ namespace MicroPin
 
     constexpr Register8 rSREG{0x3F};
 
+    constexpr Register16 rADC{0x04};
     constexpr Register16 rADCW{0x04};
     constexpr Register8 rADCL{0x04};
     constexpr Register8 rADCH{0x05};

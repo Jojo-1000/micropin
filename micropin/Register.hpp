@@ -54,12 +54,12 @@ namespace MicroPin
     {
         uint8_t addr;
         static_assert(is_integral<T>::value, "Register must contain integral type");
-        public:
+    public:
         explicit constexpr Register(uint8_t i) : addr(i)
         {}
         operator volatile T&() const
         {
-            return *reinterpret_cast<volatile T*>(addr);
+            return *reinterpret_cast<volatile T*>(addr + __SFR_OFFSET);
         }
         constexpr uint8_t GetIntAddr() const
         {
@@ -67,34 +67,34 @@ namespace MicroPin
         }
         volatile T* GetAddr() const
         {
-            return *reinterpret_cast<volatile T*>(addr);
+            return reinterpret_cast<volatile T*>(addr + __SFR_OFFSET);
         }
         const Register& operator=(const T& value) const
         {
-            *reinterpret_cast<volatile T*>(addr) = value;
+            *GetAddr() = value;
             return *this;
         }
         template<typename V, enable_if_t<is_integral<V>::value>* = nullptr>
         friend Register<T> operator|=(Register<T> r, V value)
         {
-            *reinterpret_cast<volatile T*>(r.addr) |= value;
+            *r.GetAddr() |= value;
             return r;
         }
         template<typename V, enable_if_t<is_integral<V>::value>* = nullptr>
         friend Register operator&=(Register r, V value)
         {
-            *reinterpret_cast<volatile T*>(r.addr) &= value;
+            *r.GetAddr() &= value;
             return r;
         }
 
         friend Register operator|=(Register r, Bit bit)
         {
-            *reinterpret_cast<volatile T*>(r.addr) |= (1 << static_cast<uint8_t>(bit));
+            *r.GetAddr() |= (1 << static_cast<uint8_t>(bit));
             return r;
         }
         friend Register operator&=(Register r, Bit bit)
         {
-            *reinterpret_cast<volatile T*>(r.addr) &= (1 << static_cast<uint8_t>(bit));
+            *r.GetAddr() &= (1 << static_cast<uint8_t>(bit));
             return r;
         }
     };
