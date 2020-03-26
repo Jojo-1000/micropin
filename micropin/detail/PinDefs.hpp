@@ -16,7 +16,7 @@ namespace MicroPin
 {
 namespace detail
 {
-    inline uint8_t GetRuntimePinBitmask(uint8_t pin);
+    inline Bit GetRuntimePinBitmask(uint8_t pin);
     inline uint8_t GetRuntimePinTimer(uint8_t pin);
     constexpr uint8_t GetPinPortN(uint8_t pin);
     constexpr Register8 GetPortDataDirection(uint8_t port);
@@ -39,7 +39,7 @@ namespace detail
         //static constexpr bool hasTimer;
         //static constexpr bool isAnalog;
         //static constexpr bool hasDigital;
-        //static constexpr uint8_t bitmask;
+        //static constexpr Bit bitmask;
         //static constexpr uint8_t timer;
     };
 }

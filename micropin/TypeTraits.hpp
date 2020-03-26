@@ -205,6 +205,17 @@ namespace MicroPin
     template<typename T>
     struct is_integral : detail::is_integral_helper<remove_cv_t<T>> {};
 
+    template<typename T>
+    struct underlying_type
+    {
+        using type = __underlying_type(T);
+    };
+    template<typename T>
+    using underlying_type_t = typename underlying_type<T>::type;
+
+    template<typename T>
+    struct is_enum : public integral_constant<bool, __is_enum(T)> {};
+
 
     template<bool B, typename T = void>
     struct enable_if {};

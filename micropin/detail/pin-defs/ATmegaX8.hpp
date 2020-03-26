@@ -18,31 +18,31 @@ namespace detail
 {
     struct PinBitmaskTag{};
     struct PinTimerTag{};
-    using PinBitmask = ConstexprProgmemArray<PinBitmaskTag, uint8_t, 22,
-        0x01,    // pin  0
-        0x02,    // pin  1
-        0x04,    // pin  2
-        0x08,    // pin  3
-        0x10,    // pin  4
-        0x20,    // pin  5
-        0x40,    // pin  6
-        0x80,    // pin  7
+    using PinBitmask = ConstexprProgmemArray<PinBitmaskTag, Bit, 22,
+        0_bit,    // pin  0
+        1_bit,    // pin  1
+        2_bit,    // pin  2
+        3_bit,    // pin  3
+        4_bit,    // pin  4
+        5_bit,    // pin  5
+        6_bit,    // pin  6
+        7_bit,    // pin  7
 
-        0x01,    // pin  8
-        0x02,    // pin  9
-        0x04,    // pin 10
-        0x08,    // pin 11
-        0x10,    // pin 12
-        0x20,    // pin 13
+        0_bit,    // pin  8
+        1_bit,    // pin  9
+        2_bit,    // pin 10
+        3_bit,    // pin 11
+        4_bit,    // pin 12
+        5_bit,    // pin 13
 
-        0x01,    // pin A0
-        0x02,    // pin A1
-        0x04,    // pin A2
-        0x08,    // pin A3
-        0x10,    // pin A4
-        0x20,    // pin A5
-        0x40,    // pin A6
-        0x80    // pin A7
+        0_bit,    // pin A0
+        1_bit,    // pin A1
+        2_bit,    // pin A2
+        3_bit,    // pin A3
+        4_bit,    // pin A4
+        5_bit,    // pin A5
+        6_bit,    // pin A6
+        7_bit     // pin A7
         >;
     using PinTimer = ConstexprProgmemArray<PinTimerTag, uint8_t, 22,
         0, /* 0 - port D */
@@ -70,7 +70,7 @@ namespace detail
 }
 }
 
-inline uint8_t MicroPin::detail::GetRuntimePinBitmask(uint8_t pin)
+inline MicroPin::Bit MicroPin::detail::GetRuntimePinBitmask(uint8_t pin)
 {
     return PinBitmask::RuntimeRead(pin);
 }
@@ -190,7 +190,7 @@ namespace detail
         static constexpr bool hasTimer = PinTimer::Get<Num>() != 0;
         static constexpr bool isAnalog = Analog;
         static constexpr bool hasDigital = Digital;
-        static constexpr uint8_t bitmask = PinBitmask::Get<Num>();
+        static constexpr Bit bitmask = PinBitmask::Get<Num>();
         static constexpr uint8_t timer = PinTimer::Get<Num>();
     };
     //Port D

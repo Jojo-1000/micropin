@@ -99,7 +99,7 @@ namespace MicroPin
     namespace Utils
     {
         //Compiler believes this function should not be inlined, but inlining reduces size significantly
-        __attribute__((always_inline)) inline void pinMode(Register8 typeReg, Register8 portReg, uint8_t bitmask, PinType mode)
+        __attribute__((always_inline)) inline void pinMode(Register8 typeReg, Register8 portReg, Bit bitmask, PinType mode)
         {
             uint8_t oldSREG = rSREG;
             cli();
@@ -127,16 +127,16 @@ namespace MicroPin
         }
         namespace detail
         {
-            __attribute__((always_inline)) inline void internalDigitalWriteOn(Register8 portReg, uint8_t bitmask)
+            __attribute__((always_inline)) inline void internalDigitalWriteOn(Register8 portReg, Bit bitmask)
             {
                 portReg |= bitmask;
             }
-            __attribute__((always_inline)) inline void internalDigitalWriteOff(Register8 portReg, uint8_t bitmask)
+            __attribute__((always_inline)) inline void internalDigitalWriteOff(Register8 portReg, Bit bitmask)
             {
                 portReg &= ~bitmask;
             }
         }
-        __attribute__((always_inline)) inline void digitalWrite(Register8 portReg, uint8_t bitmask, bool on)
+        __attribute__((always_inline)) inline void digitalWrite(Register8 portReg, Bit bitmask, bool on)
         {
             //detail::internalDigitalWriteOn/Off can be used directly if portReg, bitmask and on are all known at compile time
             uint8_t oldSREG = rSREG;
@@ -151,7 +151,7 @@ namespace MicroPin
             }
             rSREG = oldSREG;
         }
-        __attribute__((always_inline)) inline bool digitalRead(Register8 dataReg, uint8_t bitmask)
+        __attribute__((always_inline)) inline bool digitalRead(Register8 dataReg, Bit bitmask)
         {
             return dataReg & bitmask;
         }
@@ -185,13 +185,13 @@ namespace MicroPin
             static_assert(PinTraits::hasDigital, "Cannot digital write on pin without digital buffers");
             Utils::digitalWrite(PortType::GetPortReg(), PinTraits::bitmask, on);
         }
-        void operator=(HighType) const
+        __attribute__((always_inline)) void operator=(HighType) const
         {
             static_assert(PinTraits::hasDigital, "Cannot digital write on pin without digital buffers");
             //Directly turn on, without disabling interrupts as all values are constexpr
             Utils::detail::internalDigitalWriteOn(PortType::GetPortReg(), PinTraits::bitmask);
         }
-        void operator=(LowType) const
+        __attribute__((always_inline)) void operator=(LowType) const
         {
             static_assert(PinTraits::hasDigital, "Cannot digital write on pin without digital buffers");
             //Directly turn off, without disabling interrupts as all values are constexpr
@@ -257,6 +257,7 @@ namespace MicroPin
     private:
         using PinTraits = detail::PinTraits<Num>;
     public:
+        static_assert(PinTraits::exists, "Pin number does not exist");
         static_assert(PinTraits::isAnalog, "Pin is not an analog input, cannot use StaticAnalogPin");
         constexpr StaticAnalogPin() = default;
         uint16_t analogRead() const
