@@ -1,10 +1,10 @@
-/* Pin.h
- *
- * Copyright (C) 2018 Jan Rogall
- *
- * This software may be modified and distributed under the terms
- * of the MIT license.  See the LICENSE file for details.
- */
+/* Pin.hpp
+*
+* Copyright (C) 2018 Jan Rogall
+*
+* This software may be modified and distributed under the terms
+* of the MIT license.  See the LICENSE file for details.
+*/
 
 
 #ifndef MICROPIN_PIN_INCLUDED
@@ -77,11 +77,19 @@ namespace MicroPin
     constexpr PinTypeInput input;
     constexpr PinTypeOutput output;
     constexpr PinTypeInputPullup inputPullup;
+}
+
+// After definition of PinType
+#include "detail/PinUtils.hpp"
+
+namespace MicroPin
+{
+
 
     template<uint8_t Num>
     class Port
     {
-    public:
+        public:
         static constexpr Register8 GetTypeReg()
         {
             return detail::GetPortDataDirection(Num);
@@ -96,116 +104,52 @@ namespace MicroPin
         }
     };
 
-    namespace Utils
-    {
-        //Compiler believes this function should not be inlined, but inlining reduces size significantly
-        __attribute__((always_inline)) inline void pinMode(Register8 typeReg, Register8 portReg, Bit bitmask, PinType mode)
-        {
-            NoInterrupts i;
-            if((static_cast<uint8_t>(mode) & 0x01) == 0)
-            {
-                //Set mode to input
-                typeReg &= ~bitmask;
-            }
-            else
-            {
-                //Set mode to output
-                typeReg |= bitmask;
-            }
-            if((static_cast<uint8_t>(mode) & 0x02) == 0)
-            {
-                //Write low/disable pullup
-                portReg &= ~bitmask;
-            }
-            else
-            {
-                //Write high/enable pullup
-                portReg |= bitmask;
-            }
-        }
-        namespace detail
-        {
-            __attribute__((always_inline)) inline void internalDigitalWriteOn(Register8 portReg, Bit bitmask)
-            {
-                portReg |= bitmask;
-            }
-            __attribute__((always_inline)) inline void internalDigitalWriteOff(Register8 portReg, Bit bitmask)
-            {
-                portReg &= ~bitmask;
-            }
-        }
-        __attribute__((always_inline)) inline void digitalWrite(Register8 portReg, Bit bitmask, bool on)
-        {
-            //detail::internalDigitalWriteOn/Off can be used directly if portReg, bitmask and on are all known at compile time
-            NoInterrupts i;
-            if(on)
-            {
-                detail::internalDigitalWriteOn(portReg, bitmask);
-            }
-            else
-            {
-                detail::internalDigitalWriteOff(portReg, bitmask);
-            }
-        }
-        __attribute__((always_inline)) inline bool digitalRead(Register8 dataReg, Bit bitmask)
-        {
-            return dataReg & bitmask;
-        }
-        //analogPin = analog pin number (0-7), not actual pin number
-        inline uint16_t analogRead(uint8_t analogPin)
-        {
-            rADMUX = (rADMUX & 0xF0) | (analogPin & 0x0F);
-            //Start conversion
-            rADCSRA = (bADEN | bADSC) | MicroPin::detail::prescaleADC;
-            //Wait
-            while(rADCSRA & bADSC);
-            return rADCW;
-        }
-    }
-
     template<uint8_t Num>
     class StaticDigitalPin
     {
-    private:
+        private:
         using PinTraits = detail::PinTraits<Num>;
-    public:
+        public:
         constexpr StaticDigitalPin() = default;
         static_assert(detail::PinTraits<Num>::exists, "Pin number does not exist");
         using PortType = Port<detail::GetPinPortN(Num)>;
         void pinMode(PinType mode) const
         {
-            Utils::pinMode(PortType::GetTypeReg(), PortType::GetPortReg(), PinTraits::bitmask, mode);
+            detail::pinMode(PortType::GetTypeReg(), PortType::GetPortReg(), PinTraits::bitmask, mode);
         }
         void operator=(bool on) const
         {
             static_assert(PinTraits::hasDigital, "Cannot digital write on pin without digital buffers");
-            Utils::digitalWrite(PortType::GetPortReg(), PinTraits::bitmask, on);
+            detail::PinWrite<!PortType::GetPortReg().IsBitAddressable()>
+            ::digitalWrite(PortType::GetPortReg(), PinTraits::bitmask, on);
         }
-        __attribute__((always_inline)) void operator=(HighType) const
+        void operator=(HighType) const
         {
             static_assert(PinTraits::hasDigital, "Cannot digital write on pin without digital buffers");
             //Directly turn on, without disabling interrupts as all values are constexpr
-            Utils::detail::internalDigitalWriteOn(PortType::GetPortReg(), PinTraits::bitmask);
+            detail::PinWrite<!PortType::GetPortReg().IsBitAddressable()>
+            ::digitalWriteOn(PortType::GetPortReg(), PinTraits::bitmask);
         }
-        __attribute__((always_inline)) void operator=(LowType) const
+        void operator=(LowType) const
         {
             static_assert(PinTraits::hasDigital, "Cannot digital write on pin without digital buffers");
             //Directly turn off, without disabling interrupts as all values are constexpr
-            Utils::detail::internalDigitalWriteOff(PortType::GetPortReg(), PinTraits::bitmask);
+            detail::PinWrite<!PortType::GetPortReg().IsBitAddressable()>
+            ::digitalWriteOff(PortType::GetPortReg(), PinTraits::bitmask);
         }
         operator bool() const
         {
             static_assert(PinTraits::hasDigital, "Cannot digital read on pin without digital buffers");
-            return Utils::digitalRead(PortType::GetDataReg(), PinTraits::bitmask);
+            return PortType::GetDataReg() & PinTraits::bitmask;
         }
     };
     template<uint8_t Num>
     class StaticPWMPin : public StaticDigitalPin<Num>
     {
-    private:
+        private:
         using PinTraits = detail::PinTraits<Num>;
         using Base = StaticDigitalPin<Num>;
-    public:
+        public:
         static_assert(PinTraits::hasTimer, "Pin does not have timer, cannot use StaticPWMPin");
         void operator=(bool on) const
         {
@@ -250,15 +194,15 @@ namespace MicroPin
     template<uint8_t Num>
     class StaticAnalogPin
     {
-    private:
+        private:
         using PinTraits = detail::PinTraits<Num>;
-    public:
+        public:
         static_assert(PinTraits::exists, "Pin number does not exist");
         static_assert(PinTraits::isAnalog, "Pin is not an analog input, cannot use StaticAnalogPin");
         constexpr StaticAnalogPin() = default;
         uint16_t analogRead() const
         {
-            return Utils::analogRead(detail::GetAnalogPort(Num));
+            return detail::analogRead(detail::GetAnalogPort(Num));
         }
     };
     template<uint8_t Num>
@@ -268,35 +212,35 @@ namespace MicroPin
 
     class DigitalPin
     {
-    public:
+        public:
         explicit DigitalPin(uint8_t num)
-            :num(num)
+        :num(num)
         {}
         void pinMode(PinType mode) const
         {
-            Utils::pinMode(detail::GetPinDataDirection(num), detail::GetPinData(num), detail::GetRuntimePinBitmask(num), mode);
+            detail::pinMode(detail::GetPinDataDirection(num), detail::GetPinData(num), detail::GetRuntimePinBitmask(num), mode);
         }
         void operator=(bool on) const
         {
-            Utils::digitalWrite(detail::GetPinData(num), detail::GetRuntimePinBitmask(num), on);
+            detail::PinWrite<>::digitalWrite(detail::GetPinData(num), detail::GetRuntimePinBitmask(num), on);
         }
         operator bool() const
         {
-            return Utils::digitalRead(detail::GetPinInput(num), detail::GetRuntimePinBitmask(num));
+            return detail::GetPinInput(num) & detail::GetRuntimePinBitmask(num);
         }
         uint8_t GetNum() const
         {
             return num;
         }
-    private:
+        private:
         uint8_t num;
     };
 
     class PWMPin : public DigitalPin
     {
-    public:
+        public:
         explicit PWMPin(uint8_t num)
-            : DigitalPin(num)
+        : DigitalPin(num)
         {}
         void operator=(bool on) const
         {
@@ -343,28 +287,28 @@ namespace MicroPin
     };
     class AnalogPin
     {
-    public:
+        public:
         //analogPinNum (0-7) != pinNum!!!
         explicit AnalogPin(uint8_t analogPinNum)
-            :analogPinNum(analogPinNum)
+        :analogPinNum(analogPinNum)
         {}
         uint16_t analogRead() const
         {
-            return Utils::analogRead(analogPinNum);
+            return detail::analogRead(analogPinNum);
         }
-    private:
+        private:
         uint8_t analogPinNum;
     };
     class AnalogDigitalPin : public DigitalPin
     {
-    //Reimplemented AnalogPin's functionality, because otherwise there would be 1 byte overhead
-    public:
+        //Reimplemented AnalogPin's functionality, because otherwise there would be 1 byte overhead
+        public:
         explicit AnalogDigitalPin(uint8_t num)
-            :DigitalPin(num)
+        :DigitalPin(num)
         {}
         uint16_t analogRead() const
         {
-            return Utils::analogRead(detail::GetAnalogPort(GetNum()));
+            return detail::analogRead(detail::GetAnalogPort(GetNum()));
         }
     };
 }

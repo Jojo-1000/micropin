@@ -69,6 +69,10 @@ namespace MicroPin
         {
             return reinterpret_cast<volatile T*>(addr + __SFR_OFFSET);
         }
+        constexpr bool IsBitAddressable() const
+        {
+            return addr <= 0x1F;
+        }
         const Register& operator=(const T& value) const
         {
             *GetAddr() = value;
