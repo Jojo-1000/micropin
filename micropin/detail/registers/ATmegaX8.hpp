@@ -1,10 +1,10 @@
 /* detail/registers/ATmegaX8.h
- *
- * Copyright (C) 2018 Jan Rogall
- *
- * This software may be modified and distributed under the terms
- * of the MIT license.  See the LICENSE file for details.
- */
+*
+* Copyright (C) 2018 Jan Rogall
+*
+* This software may be modified and distributed under the terms
+* of the MIT license.  See the LICENSE file for details.
+*/
 
 #ifndef MICROPIN_DETAIL_REGISTERS_ATMEGAX8_INCLUDED
 #define MICROPIN_DETAIL_REGISTERS_ATMEGAX8_INCLUDED
@@ -35,6 +35,7 @@ namespace MicroPin
 
     constexpr Register8 rSREG{0x5F};
 
+    constexpr Register16 rADC{0x78};
     constexpr Register16 rADCW{0x78};
     constexpr Register8 rADCL{0x78};
     constexpr Register8 rADCH{0x79};

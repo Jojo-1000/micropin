@@ -12,9 +12,9 @@
 
 #include <stdint.h>
 #include "RegisterDefinitions.hpp"
-#include <avr/interrupt.h>
 
 #include "Register.hpp"
+#include "Interrupts.hpp"
 #include "detail/ADC.hpp"
 #include "detail/PinDefs.hpp"
 
@@ -101,8 +101,7 @@ namespace MicroPin
         //Compiler believes this function should not be inlined, but inlining reduces size significantly
         __attribute__((always_inline)) inline void pinMode(Register8 typeReg, Register8 portReg, Bit bitmask, PinType mode)
         {
-            uint8_t oldSREG = rSREG;
-            cli();
+            NoInterrupts i;
             if((static_cast<uint8_t>(mode) & 0x01) == 0)
             {
                 //Set mode to input
@@ -123,7 +122,6 @@ namespace MicroPin
                 //Write high/enable pullup
                 portReg |= bitmask;
             }
-            rSREG = oldSREG;
         }
         namespace detail
         {
@@ -139,8 +137,7 @@ namespace MicroPin
         __attribute__((always_inline)) inline void digitalWrite(Register8 portReg, Bit bitmask, bool on)
         {
             //detail::internalDigitalWriteOn/Off can be used directly if portReg, bitmask and on are all known at compile time
-            uint8_t oldSREG = rSREG;
-            cli();
+            NoInterrupts i;
             if(on)
             {
                 detail::internalDigitalWriteOn(portReg, bitmask);
@@ -149,7 +146,6 @@ namespace MicroPin
             {
                 detail::internalDigitalWriteOff(portReg, bitmask);
             }
-            rSREG = oldSREG;
         }
         __attribute__((always_inline)) inline bool digitalRead(Register8 dataReg, Bit bitmask)
         {
