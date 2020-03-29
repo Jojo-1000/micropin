@@ -78,6 +78,12 @@ namespace MicroPin
             *GetAddr() = value;
             return *this;
         }
+        void Set(Bit bit) const {
+            *this |= bit;
+        }
+        void Clear(Bit bit) const {
+            *this &= ~bit;
+        }
         template<typename V, enable_if_t<is_integral<V>::value>* = nullptr>
         friend Register<T> operator|=(Register<T> r, V value)
         {

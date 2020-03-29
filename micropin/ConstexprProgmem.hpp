@@ -54,24 +54,38 @@ namespace detail
     
 }
 
+    template<typename T, T... Values>
+    class ConstexprArray
+    {
+    public:
+        //Only used as static typedef
+        ConstexprArray() = delete;
+        template<size_t I>
+        static constexpr T Get()
+        {
+            static_assert(I < sizeof...(Values), "Get index too high");
+            return get<I>(make_own_tuple(Values...));
+        }
+        static constexpr size_t Size()
+        {
+            return sizeof...(Values);
+        }
+    };
 
     //Saves array of values for both compile time and runtime access
     //Usage:
-    //  struct XXXTag{};
-    //  using XXX = ConstexprProgmemArray<XXXTag, T, N, values...>;
+    //  using XXX = ConstexprProgmemArray<T, values...>;
     //  ...
     //  a = XXX::RuntimeRead(i);
     //  b = XXX::Get<I>();
-    //Tag: uniquely identify static data
-    template<typename Tag, typename T, T... Values>
-    class ConstexprProgmemArray
+    template<typename T, T... Values>
+    class ConstexprProgmemArray : public ConstexprArray<T, Values...>
     {
     public:
         //Only used as static typedef
         ConstexprProgmemArray() = delete;
 
         using InternalType = T[sizeof...(Values)];
-        //static_assert(Num == sizeof...(Values), "Wrong number of values given");
         static_assert(is_same<decltype(detail::PgmReadSelect<T>::Read), T(const T*)>::value, "Unsupported data type");
 
         static const T data[sizeof...(Values)] PROGMEM;
@@ -79,17 +93,12 @@ namespace detail
         {
             return detail::PgmReadSelect<T>::Read(data + index);
         }
-        template<size_t I>
-        static constexpr T Get()
-        {
-            static_assert(I < sizeof...(Values), "Get index too high");
-            return get<I>(make_own_tuple(Values...));
-        }
+        
     };
 }
 
 //Definition
-template<typename Tag, typename T, T... Values>
-const T MicroPin::ConstexprProgmemArray<Tag, T, Values...>::data[sizeof...(Values)] PROGMEM = {Values...};
+template<typename T, T... Values>
+const T MicroPin::ConstexprProgmemArray<T, Values...>::data[sizeof...(Values)] PROGMEM = {Values...};
 
 #endif

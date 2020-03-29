@@ -175,11 +175,11 @@ namespace MicroPin
         {
             if(val == 0)
             {
-                *this = 0;
+                *this = low;
             }
             else if(val == 255)
             {
-                *this = 255;
+                *this = high;
             }
             else
             {
@@ -202,7 +202,7 @@ namespace MicroPin
         constexpr StaticAnalogPin() = default;
         uint16_t analogRead() const
         {
-            return detail::analogRead(detail::GetAnalogPort(Num));
+            return detail::analogRead(detail::GetAnalogChannel(Num));
         }
     };
     template<uint8_t Num>
@@ -256,11 +256,11 @@ namespace MicroPin
         {
             if(val == 0)
             {
-                *this = 0;
+                *this = low;
             }
             else if(val == 255)
             {
-                *this = 255;
+                *this = high;
             }
             else
             {
@@ -308,7 +308,7 @@ namespace MicroPin
         {}
         uint16_t analogRead() const
         {
-            return detail::analogRead(detail::GetAnalogPort(GetNum()));
+            return detail::analogRead(detail::GetAnalogChannel(GetNum()));
         }
     };
 }

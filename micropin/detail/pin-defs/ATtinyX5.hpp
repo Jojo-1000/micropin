@@ -62,33 +62,22 @@ constexpr MicroPin::Register8 MicroPin::detail::GetPortInput(uint8_t port)
 {
     return rPINB;
 }
-constexpr MicroPin::Register8 MicroPin::detail::GetPinDataDirection(uint8_t pin)
-{
-    return GetPortDataDirection(GetPinPortN(pin));
-}
-constexpr MicroPin::Register8 MicroPin::detail::GetPinData(uint8_t pin)
-{
-    return GetPortData(GetPinPortN(pin));
-}
-constexpr MicroPin::Register8 MicroPin::detail::GetPinInput(uint8_t pin)
-{
-    return GetPortInput(GetPinPortN(pin));
-}
+
 inline void MicroPin::detail::ClearPWM(uint8_t timer)
 {
     switch(timer)
     {
     case 1:
-        rTCCR0A &= ~bCOM0A1;
+        rTCCR0A.Clear(bCOM0A1);
         break;
     case 2:
-        rTCCR0A &= ~bCOM0B1;
+        rTCCR0A.Clear(bCOM0B1);
         break;
     case 3:
-        rTCCR1 &= ~bCOM1A1;
+        rTCCR1.Clear(bCOM1A1);
         break;
     case 4:
-        rGTCCR &= ~bCOM1B1;
+        rGTCCR.Clear(bCOM1B1);
         break;
     }
 }
@@ -97,27 +86,34 @@ inline void MicroPin::detail::AnalogWrite(uint8_t timerNum, uint8_t value)
     switch(timerNum)
     {
     case 1:
-        rTCCR0A |= bCOM0A1;
+        rTCCR0A.Set(bCOM0A1);
         rOCR0A = value;
         break;
     case 2:
-        rTCCR0A |= bCOM0B1;
+        rTCCR0A.Set(bCOM0B1);
         rOCR0B = value;
         break;
     case 3:
-        rTCCR1 |= bCOM1A1;
+        rTCCR1.Set(bCOM1A1);
         rOCR1A = value;
         break;
     case 4:
-        rGTCCR |= bCOM1B1;
+        rGTCCR.Set(bCOM1B1);
         rOCR1B = value;
     }
 }
 //Does not check input range
-constexpr uint8_t MicroPin::detail::GetAnalogPort(uint8_t digitalPin)
+constexpr uint8_t MicroPin::detail::GetAnalogChannel(uint8_t digitalPin)
 {
     return digitalPin == 2 ? 1 : (digitalPin == 3 ? 3: (digitalPin == 4 ? 2 : 0));
 }
+
+// There are so few pins that the array size does not matter
+inline uint8_t MicroPin::detail::GetRuntimePinTimer(uint8_t pin)
+{
+    return PinTimer::RuntimeRead(pin);
+}
+
 
 namespace MicroPin
 {

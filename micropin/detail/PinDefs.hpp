@@ -16,23 +16,39 @@ namespace MicroPin
 {
 namespace detail
 {
-    inline Bit GetRuntimePinBitmask(uint8_t pin);
-    inline uint8_t GetRuntimePinTimer(uint8_t pin);
-    constexpr uint8_t GetPinPortN(uint8_t pin);
+    // Processor specific
     constexpr Register8 GetPortDataDirection(uint8_t port);
     constexpr Register8 GetPortData(uint8_t port);
     constexpr Register8 GetPortInput(uint8_t port);
-    constexpr Register8 GetPinDataDirection(uint8_t pin);
-    constexpr Register8 GetPinData(uint8_t pin);
-    constexpr Register8 GetPinInput(uint8_t pin);
 
     inline void ClearPWM(uint8_t timer);
     inline void AnalogWrite(uint8_t timer, uint8_t value);
 
-    //Does not check input range
-    constexpr uint8_t GetAnalogPort(uint8_t digitalPin);
+    // Pinout specific (Board specific)
+    inline Bit GetRuntimePinBitmask(uint8_t pin);
+    inline uint8_t GetRuntimePinTimer(uint8_t pin);
+    constexpr uint8_t GetPinPortN(uint8_t pin);
+    
+    constexpr Register8 GetPinDataDirection(uint8_t pin)
+    {
+        return GetPortDataDirection(GetPinPortN(pin));
+    }
+    constexpr Register8 GetPinData(uint8_t pin)
+    {
+        return GetPortData(GetPinPortN(pin));
+    }
+    constexpr Register8 GetPinInput(uint8_t pin)
+    {
+        return GetPortInput(GetPinPortN(pin));
+    }
 
-    template<uint8_t Num>
+    
+    constexpr bool IsAnalogPin(uint8_t num);
+    constexpr bool IsDigitalPin(uint8_t num);
+    //Does not check input range
+    constexpr uint8_t GetAnalogChannel(uint8_t digitalPin);
+
+    template<uint8_t Num, typename Enable = void>
     struct PinTraits
     {
         static constexpr bool exists = false;
@@ -56,5 +72,27 @@ namespace detail
 #else
 #   error "Unsupported device"
 #endif
+
+namespace MicroPin
+{
+namespace detail
+{
+    template<uint8_t Num>
+    struct PinTraits<Num, enable_if_t<(Num < PinBitmask::Size())>>
+    {
+        static constexpr bool exists = true;
+        static constexpr bool hasTimer = PinTimer::Get<Num>() != 0;
+        static constexpr bool isAnalog = IsAnalogPin(Num);
+        static constexpr bool hasDigital = IsDigitalPin(Num);
+        static constexpr Bit bitmask = PinBitmask::Get<Num>();
+        static constexpr uint8_t timer = PinTimer::Get<Num>();
+    };
+}
+}
+
+inline MicroPin::Bit MicroPin::detail::GetRuntimePinBitmask(uint8_t pin)
+{
+    return PinBitmask::RuntimeRead(pin);
+}
 
 #endif
