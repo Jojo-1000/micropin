@@ -11,6 +11,7 @@ class Register:
     width: int
     name: str
     addr: int
+    isIO: bool
     def __repr__(self):
         return "%s(0x%02x)" % (self.name, self.addr)
 
@@ -23,7 +24,8 @@ class SFRPreprocessor(pcpp.Preprocessor):
         self.potential_include_guard = None
         self.registers = []
         self.define("_AVR_IO_H_ 1")
-        self.reg_macro_start = '_SFR_IO'
+        self.io_macro_start = '_SFR_IO'
+        self.mem_macro_start = '_SFR_MEM'
         self.line_directive = None
         
     def on_comment(self, tok):
@@ -57,13 +59,20 @@ class SFRPreprocessor(pcpp.Preprocessor):
         raise OutputDirective(Action.IgnoreAndPassThrough)
 
     def is_register_define(self, toks):
-        return len(toks) >= 3 and toks[2].value.startswith(self.reg_macro_start)
+        if len(toks) < 3:
+            return False
+        return toks[2].value.startswith(self.io_macro_start) or toks[2].value.startswith(self.mem_macro_start)
 
     def add_register(self, toks):
         r = Register()
         r.name = toks[0].value;
         try:
-            r.width = int(toks[2].value[len(self.reg_macro_start):])
+            if toks[2].value.startswith(self.io_macro_start):
+                r.isIO = True
+                r.width = int(toks[2].value[len(self.io_macro_start):])
+            else:
+                r.isIO = False
+                r.width = int(toks[2].value[len(self.mem_macro_start):])
             r.addr = int([tok for tok in toks if tok.type == self.t_INTEGER][0].value, base=0)
             self.registers.append(r)
         except:
@@ -102,42 +111,46 @@ def output_registers(source_filename: str,filename: str, registers: [Register]):
         output.write('#include "')
         output.write('"\n')
     output.write('namespace ' + namespace + '\n{\n')
+    output.write('\tconstexpr uint8_t sfrOffset = __SFR_OFFSET;\n')
     for r in registers:
-        output.write('\tconstepxr Register')
+        output.write('\tconstexpr Register')
         output.write(str(r.width))
         output.write(' r')
         output.write(r.name)
-        output.write('{0x%02x};\n' % (r.addr))
+        output.write('{0x%02x%s};\n' % (r.addr, ' + sfrOffset' if r.isIO else ''))
     output.write('}\n\n#endif\n')
     output.close()
 
-if not os.path.exists(output_dir):
-    os.mkdir(output_dir)
 
 if args.input_dir is not None:
     for file in os.listdir(args.input_dir):
         if file.endswith('.h'):
             input_files.append(open(args.input_dir + os.path.sep + file))
 
-for input in input_files:
-    preprocessor = SFRPreprocessor()
-    filename = os.path.basename(input.name)
-    preprocessor.parse(input)
-    output_file = 'Reg' + filename.rpartition('.')[0].replace('io', '').capitalize() + extension
-    if not args.output_preprocessed:
-        # Discard preprocessed output
-        tok = preprocessor.token()
-        while tok is not None:
+if len(input_files) > 0:
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+    for input in input_files:
+        preprocessor = SFRPreprocessor()
+        filename = os.path.basename(input.name)
+        preprocessor.parse(input)
+        output_file = 'Reg' + filename.rpartition('.')[0].replace('io', '').capitalize() + extension
+        if not args.output_preprocessed:
+            # Discard preprocessed output
             tok = preprocessor.token()
-        input.close()
-    else:
-        preprocessed_output = open(output_dir + os.path.sep + filename, 'wt')
-        preprocessor.write(preprocessed_output)
-        preprocessed_output.close()
-        input.close()
-    if len(preprocessor.registers) > 0:
-        output_registers(filename, output_file, preprocessor.registers)
-        output_files.append(output_file)
-        print('Parsed %s -> %s' % (filename, output_file))
-    else:
-        print('Skipped %s because it contained no register definitions' % (file))
+            while tok is not None:
+                tok = preprocessor.token()
+            input.close()
+        else:
+            preprocessed_output = open(output_dir + os.path.sep + filename, 'wt')
+            preprocessor.write(preprocessed_output)
+            preprocessed_output.close()
+            input.close()
+        if len(preprocessor.registers) > 0:
+            output_registers(filename, output_file, preprocessor.registers)
+            output_files.append(output_file)
+            print('Parsed %s -> %s' % (filename, output_file))
+        else:
+            print('Skipped %s because it contained no register definitions' % (filename))
+else:
+    print('No inputs specified')

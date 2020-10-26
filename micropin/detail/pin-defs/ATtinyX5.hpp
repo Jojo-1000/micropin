@@ -14,27 +14,27 @@
 
 namespace MicroPin
 {
-namespace detail
-{
-    struct PinBitmaskTag{};
-    struct PinTimerTag{};
-    using PinBitmask = ConstexprProgmemArray<PinBitmaskTag, Bit,
-        0_bit,
-        1_bit,
-        2_bit,
-        3_bit,
-        4_bit,
-        5_bit
-    >;
-    using PinTimer = ConstexprProgmemArray<PinTimerTag, uint8_t,
-        1,
-        2,
-        0,
-        0,
-        4,
-        0
-    >;
-}
+    namespace detail
+    {
+        struct PinBitmaskTag {};
+        struct PinTimerTag {};
+        using PinBitmask = ConstexprProgmemArray<PinBitmaskTag, Bit,
+            0_bit,
+            1_bit,
+            2_bit,
+            3_bit,
+            4_bit,
+            5_bit
+        >;
+        using PinTimer = ConstexprProgmemArray<PinTimerTag, uint8_t,
+            1,
+            2,
+            0,
+            0,
+            4,
+            0
+        >;
+    }
 }
 
 inline MicroPin::Bit MicroPin::detail::GetRuntimePinBitmask(uint8_t pin)
@@ -65,7 +65,7 @@ constexpr MicroPin::Register8 MicroPin::detail::GetPortInput(uint8_t port)
 
 inline void MicroPin::detail::ClearPWM(uint8_t timer)
 {
-    switch(timer)
+    switch (timer)
     {
     case 1:
         rTCCR0A.Clear(bCOM0A1);
@@ -83,7 +83,7 @@ inline void MicroPin::detail::ClearPWM(uint8_t timer)
 }
 inline void MicroPin::detail::AnalogWrite(uint8_t timerNum, uint8_t value)
 {
-    switch(timerNum)
+    switch (timerNum)
     {
     case 1:
         rTCCR0A.Set(bCOM0A1);
@@ -105,7 +105,7 @@ inline void MicroPin::detail::AnalogWrite(uint8_t timerNum, uint8_t value)
 //Does not check input range
 constexpr uint8_t MicroPin::detail::GetAnalogChannel(uint8_t digitalPin)
 {
-    return digitalPin == 2 ? 1 : (digitalPin == 3 ? 3: (digitalPin == 4 ? 2 : 0));
+    return digitalPin == 2 ? 1 : (digitalPin == 3 ? 3 : (digitalPin == 4 ? 2 : 0));
 }
 
 // There are so few pins that the array size does not matter
@@ -114,28 +114,14 @@ inline uint8_t MicroPin::detail::GetRuntimePinTimer(uint8_t pin)
     return PinTimer::RuntimeRead(pin);
 }
 
-
-namespace MicroPin
+constexpr bool IsAnalogPin(uint8_t num)
 {
-namespace detail
-{
-    template<uint8_t Num, bool Analog = false, bool Digital = true>
-    struct PinTraitsHelper
-    {
-        static constexpr bool exists = true;
-        static constexpr bool hasTimer = PinTimer::Get<Num>() != 0;
-        static constexpr bool isAnalog = Analog;
-        static constexpr bool hasDigital = Digital;
-        static constexpr Bit bitmask = PinBitmask::Get<Num>();
-        static constexpr uint8_t timer = PinTimer::Get<Num>();
-    };
-    //Port B
-    template<> struct PinTraits<0> : PinTraitsHelper<0>{};
-    template<> struct PinTraits<1> : PinTraitsHelper<1>{};
-    template<> struct PinTraits<2> : PinTraitsHelper<2, true>{};
-    template<> struct PinTraits<3> : PinTraitsHelper<3, true>{};
-    template<> struct PinTraits<4> : PinTraitsHelper<4, true>{};
-    template<> struct PinTraits<5> : PinTraitsHelper<5, true>{};
+    return num > 1;
 }
+constexpr bool IsDigitalPin(uint8_t num)
+{
+    return true;
+}
+
 }
 #endif
