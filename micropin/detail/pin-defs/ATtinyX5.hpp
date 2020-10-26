@@ -16,9 +16,7 @@ namespace MicroPin
 {
     namespace detail
     {
-        struct PinBitmaskTag {};
-        struct PinTimerTag {};
-        using PinBitmask = ConstexprProgmemArray<PinBitmaskTag, Bit,
+        using PinBitmask = ConstexprProgmemArray<Bit,
             0_bit,
             1_bit,
             2_bit,
@@ -26,7 +24,7 @@ namespace MicroPin
             4_bit,
             5_bit
         >;
-        using PinTimer = ConstexprProgmemArray<PinTimerTag, uint8_t,
+        using PinTimer = ConstexprProgmemArray<uint8_t,
             1,
             2,
             0,

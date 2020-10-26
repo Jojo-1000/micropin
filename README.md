@@ -74,3 +74,6 @@ int main()
   * ATtiny25
   * ATtiny45
   * ATtiny85
+* ATtinyX41 family
+  * ATtiny441
+  * ATtiny841

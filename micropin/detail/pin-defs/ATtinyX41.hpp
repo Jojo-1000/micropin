@@ -18,9 +18,7 @@ namespace MicroPin
 {
     namespace detail
     {
-        struct PinBitmaskTag {};
-        struct PinTimerTag {};
-        using PinBitmask = ConstexprProgmemArray<PinBitmaskTag, Bit,
+        using PinBitmask = ConstexprProgmemArray<Bit,
             0_bit, // pin 0
             1_bit, // pin 1
             2_bit, // pin 2
@@ -35,7 +33,7 @@ namespace MicroPin
             0_bit, // pin 10
             3_bit // pin 11
         >;
-        using PinTimer = ConstexprProgmemArray<PinTimerTag, uint8_t,
+        using PinTimer = ConstexprProgmemArray<uint8_t,
             0, // pin 0
             0, // pin 1
             0, // pin 2
@@ -63,8 +61,8 @@ inline uint8_t MicroPin::detail::GetRuntimePinTimer(uint8_t pin)
 }
 constexpr uint8_t MicroPin::detail::GetPinPortN(uint8_t pin)
 {
-    // Port A: 0-7
-    // Port B: 8-11
+    // Port A (0): 0-7
+    // Port B (1): 8-11
     return pin > 7 ? 1 : 0;
 }
 constexpr MicroPin::Register8 MicroPin::detail::GetPortDataDirection(uint8_t port)
