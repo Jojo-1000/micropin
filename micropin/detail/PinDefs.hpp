@@ -69,6 +69,8 @@ namespace detail
 #   include "pin-defs/ATmegaX8.hpp"
 #elif defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
 #   include "pin-defs/ATtinyX5.hpp"
+#elif defined(__AVR_ATtiny441__) || defined(__AVR_ATtiny841)
+#   include "pin-defs/ATtinyX41.hpp"
 #else
 #   error "Unsupported device"
 #endif

@@ -11,6 +11,7 @@
 #define MICROPIN_REGISTER_INCLUDED
 
 #include <stdint.h>
+#include <avr/sfr_defs.h>
 
 #include "TypeTraits.hpp"
 
@@ -49,6 +50,8 @@ namespace MicroPin
         return r | l;
     }
 
+    constexpr uint8_t sfrOffset = __SFR_OFFSET;
+
     template<typename T>
     class Register
     {
@@ -59,7 +62,7 @@ namespace MicroPin
         {}
         operator volatile T&() const
         {
-            return *reinterpret_cast<volatile T*>(addr + __SFR_OFFSET);
+            return *reinterpret_cast<volatile T*>(addr);
         }
         constexpr uint8_t GetIntAddr() const
         {
@@ -67,11 +70,11 @@ namespace MicroPin
         }
         volatile T* GetAddr() const
         {
-            return reinterpret_cast<volatile T*>(addr + __SFR_OFFSET);
+            return reinterpret_cast<volatile T*>(addr);
         }
         constexpr bool IsBitAddressable() const
         {
-            return addr <= 0x1F;
+            return addr <= (0x1F + sfrOffset);
         }
         const Register& operator=(const T& value) const
         {
