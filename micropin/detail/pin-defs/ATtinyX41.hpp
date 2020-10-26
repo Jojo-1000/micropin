@@ -51,14 +51,6 @@ namespace MicroPin
     }
 }
 
-inline MicroPin::Bit MicroPin::detail::GetRuntimePinBitmask(uint8_t pin)
-{
-    return PinBitmask::RuntimeRead(pin);
-}
-inline uint8_t MicroPin::detail::GetRuntimePinTimer(uint8_t pin)
-{
-    return PinTimer::RuntimeRead(pin);
-}
 constexpr uint8_t MicroPin::detail::GetPinPortN(uint8_t pin)
 {
     // Port A (0): 0-7
