@@ -113,7 +113,7 @@ namespace MicroPin
         constexpr StaticDigitalPin() = default;
         static_assert(detail::PinTraits<Num>::exists, "Pin number does not exist");
         using PortType = Port<detail::GetPinPortN(Num)>;
-        void pinMode(PinType mode) const
+        __attribute__((always_inline)) void pinMode(PinType mode) const
         {
             detail::pinMode(PortType::GetTypeReg(), PortType::GetPortReg(), PinTraits::bitmask, mode);
         }

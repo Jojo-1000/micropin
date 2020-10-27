@@ -19,10 +19,10 @@ namespace MicroPin
 class NoInterrupts
 {
 public:
-    NoInterrupts() : oldSREG(rSREG) {
+    __attribute__((always_inline)) NoInterrupts() : oldSREG(rSREG) {
         cli();
     }
-    ~NoInterrupts() {
+    __attribute__((always_inline)) ~NoInterrupts() {
         rSREG = oldSREG;
     }
     NoInterrupts(NoInterrupts&&) = delete;
