@@ -59,15 +59,15 @@ constexpr uint8_t MicroPin::detail::GetPinPortN(uint8_t pin)
 }
 constexpr MicroPin::Register8 MicroPin::detail::GetPortDataDirection(uint8_t port)
 {
-    return  port ? rDDRA : rDDRB;
+    return  port ? rDDRB : rDDRA;
 }
 constexpr MicroPin::Register8 MicroPin::detail::GetPortData(uint8_t port)
 {
-    return port ? rPORTA : rPORTB;
+    return port ? rPORTB : rPORTA;
 }
 constexpr MicroPin::Register8 MicroPin::detail::GetPortInput(uint8_t port)
 {
-    return port ? rPINA : rPINB;
+    return port ? rPINB : rPINA;
 }
 
 inline void MicroPin::detail::ClearPWM(uint8_t timer)
