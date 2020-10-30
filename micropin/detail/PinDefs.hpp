@@ -58,6 +58,8 @@ namespace detail
         //static constexpr Bit bitmask;
         //static constexpr uint8_t timer;
     };
+
+    constexpr bool hasSeparatePullups;
 }
 }
 

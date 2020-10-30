@@ -48,6 +48,15 @@ namespace MicroPin
             0, // pin 10
             0 // pin 11
         >;
+
+        constexpr MicroPin::Register8 GetPortPullupEnable(uint8_t port)
+        {
+            return port ? rPUEB : rPUEA;
+        }
+        constexpr MicroPin::Register8 GetPinPullupEnable(uint8_t pin)
+        {
+            return GetPortPullupEnable(GetPinPortN(pin));
+        }
     }
 }
 
@@ -149,5 +158,7 @@ constexpr bool MicroPin::detail::IsDigitalPin(uint8_t num)
 {
     return true;
 }
+
+constexpr bool MicroPin::detail::hasSeparatePullups = true;
 
 #endif

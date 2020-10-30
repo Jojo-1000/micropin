@@ -115,7 +115,7 @@ namespace MicroPin
         using PortType = Port<detail::GetPinPortN(Num)>;
         __attribute__((always_inline)) void pinMode(PinType mode) const
         {
-            detail::pinMode(PortType::GetTypeReg(), PortType::GetPortReg(), PinTraits::bitmask, mode);
+            detail::pinMode<Num>(mode);
         }
         void operator=(bool on) const
         {
@@ -218,7 +218,7 @@ namespace MicroPin
         {}
         void pinMode(PinType mode) const
         {
-            detail::pinMode(detail::GetPinDataDirection(num), detail::GetPinData(num), detail::GetRuntimePinBitmask(num), mode);
+            detail::pinMode(num, mode);
         }
         void operator=(bool on) const
         {

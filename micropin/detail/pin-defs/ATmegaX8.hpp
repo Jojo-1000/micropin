@@ -181,4 +181,6 @@ inline uint8_t MicroPin::detail::GetRuntimePinTimer(uint8_t pin)
     }
 }
 
+constexpr bool MicroPin::detail::hasSeparatePullups = false;
+
 #endif

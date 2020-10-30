@@ -112,14 +112,16 @@ inline uint8_t MicroPin::detail::GetRuntimePinTimer(uint8_t pin)
     return PinTimer::RuntimeRead(pin);
 }
 
-constexpr bool IsAnalogPin(uint8_t num)
+constexpr bool MicroPin::detail::IsAnalogPin(uint8_t num)
 {
     return num > 1;
 }
-constexpr bool IsDigitalPin(uint8_t num)
+constexpr bool MicroPin::detail::IsDigitalPin(uint8_t num)
 {
     return true;
 }
+
+constexpr bool MicroPin::detail::hasSeparatePullups = true;
 
 }
 #endif
